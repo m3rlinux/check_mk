@@ -26,16 +26,15 @@
 
 # Threshold
 factory_settings["cloudmark_default_levels"] = {
-    "Queue"     : ( 5000, 10000 ),
-    "Delivery"     : ( 5000, 30000 ),
-    "Concurrency" : ( 8000, 10000 ),
+    "Queue"         : (5000, 10000),
+    "Delivery"      : (5000, 30000),
+    "Concurrency"   : (8000, 10000),
 }
 
 
 def inventory_cloudmark(info):
     for line in info:
         key = line[0]
-        value = line[1]
         if key == "Queue":
             yield key, {}
         elif key == "Delivery":
@@ -43,9 +42,11 @@ def inventory_cloudmark(info):
         elif key == "Concurrency":
             yield key, {}
 
+
 def check_cloudmark(item, params, info):
     for line in info:
         key = line[0]
+        warn, crit = (0, 0)
         if key == item:
             if item == 'Queue':
                 warn = params['Queue'][0]
@@ -57,13 +58,14 @@ def check_cloudmark(item, params, info):
                 warn = params['Concurrency'][0]
                 crit = params['Concurrency'][1]
             val = int(line[1])
-            perfdata = [ ( item, val, warn, crit ) ]
+            perfdata = [(item, val, warn, crit)]
             if val > crit:
                 return 2, "Mail %s is %d" % (item, val), perfdata
             elif val > warn:
                 return 1, "Mail %s is %d" % (item, val), perfdata
             else:
                 return 0, "Mail %s is %d" % (item, val), perfdata
+
 
 check_info["cloudmark"] = {
     'check_function':            check_cloudmark,
