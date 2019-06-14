@@ -56,5 +56,5 @@ Give examples
 
 ## License
 
-This project is licensed under the GPLv3 License. See more details in file LICENSE
+This project is licensed under the GPLv3 License. [See more details in license file](../LICENSE)
 
