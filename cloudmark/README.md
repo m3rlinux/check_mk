@@ -1,17 +1,51 @@
-CLOUDMARK
-=====
+# CLOUDMARK
+
 Check_mk cloudmark monitoring scripts
 
-Usage:
+## Getting Started
 
-On Client:
- 
-        cp plugins/cloudmark /usr/lib/check_mk_agent/plugins
-        chmod 700 /usr/lib/check_mk_agent/plugins/cloudmark
+These instructions will get you the cloudmark plugin correctly installed on your Check_MK Server.
 
-On Monitoring Server:
- If using OMD:
- 
-        cp checks/cloudmark ~/local/share/check_mk/checks/
-        cp checkman/cloudmark ~/local/share/check_mk/checkman/
-        cp wato/plugins/cloudmark.py ~/local/share/check_mk/web/plugins/wato/
+### Prerequisites
+
+What things you need to install the software and how to install them
+
+```
+Give examples
+```
+
+### Installing package
+
+1. Connect via SSH on your monitoring server;
+1. change user to your site;
+1. Download the cloudmark-v1.0.mkp; `wget|curl`
+1. use cmk to install de oackage.
+
+
+#### Example
+```
+# su - mysite
+~ wget http://github.com/m3rlinux/check_mk/cloudmark/cloudmark-v1.0.mpk
+~ cmk -P install cloudmark-v1.0.mpk
+```
+
+
+### Installing agent plugin
+
+1. Connect via SSH on your Cloudmark server;
+1. download the plugin; `wget|curl`
+1. move the plugin into "plugins" folder of your agent;
+1. add execution permission to the file.
+
+#### Exampe
+
+```
+# wget http://github.com/m3rlinux/check_mk/cloudmark/cloudmark/plugins/cloudmark
+# mv cloudmark /usr/lib/check_mk_agent/plugins/
+# chmod +x /usr/lib/check_mk_agent/plugins/cloudmark
+```
+
+## License
+
+This project is licensed under the GPLv3 License.
+
