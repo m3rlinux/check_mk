@@ -2,6 +2,15 @@
 
 Check_mk cloudmark monitoring scripts
 
+
+### Table of Contents
+**[Getting Started](#getting-started)**<br>
+**[Prerequisites](#prerequisites)**<br>
+**[Installing package](#installing-package)**<br>
+**[Installing agent plugin](#installing-agent-plugin)**<br>
+**[License](#license)**<br>
+
+
 ## Getting Started
 
 These instructions will get you the cloudmark plugin correctly installed on your Check_MK Server.
@@ -19,7 +28,7 @@ Give examples
 1. Connect via SSH on your monitoring server;
 1. change user to your site;
 1. Download the cloudmark-v1.0.mkp; `wget|curl`
-1. use cmk to install de oackage.
+1. use cmk to install de package.
 
 
 #### Example
