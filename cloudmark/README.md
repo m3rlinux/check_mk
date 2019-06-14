@@ -13,7 +13,7 @@ Check_mk cloudmark monitoring scripts
 
 ## Getting Started
 
-These instructions will get you the cloudmark plugin correctly installed on your Check_MK Server.
+These instructions will get you the cloudmark plugin correctly installed on your Check_MK Server and Cloudmark Server.
 
 ### Prerequisites
 
