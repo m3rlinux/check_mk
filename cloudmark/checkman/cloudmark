@@ -1,0 +1,18 @@
+title: Checks amount Queue, Delivery and Concurrency of Cloudmark MTA
+agents: linux
+author: Davide Gibilisco <m3rlinux.it@gmail.com>
+catalog: app/Cloudmark
+license: GPL
+distribution: check_mk
+description:
+ This plugin check for some cloudmark stats (Queue, Delivery and Concurrency)
+
+ The checks become {warning} or {critical} depending on default or custom levels
+ 
+ This is a inventorized check and will create one service for every info parameter found.
+
+ Default warn or critical values are set and graphs will be created.
+item:
+ To Do
+inventory:
+ Automatic inventory is supported.
