@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# Check_MK Cloudmark Info Plugin
+#
+# Copyright 2019, Davide Gibilisco <m3rlinux.it@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Example Agent Output:
+# <<<cloudmark>>>
+# Queue 82
+# Delivery 13056
+# Concurrency 2680
+
+import urllib2
+import base64
+import json as simplejson
+username = ""
+password = ""
+
+
+print('<<<cloudmark>>>')
+modes = ["Queue", "Delivery", "Concurrency"]
+for MODE in modes:
+        if MODE == "Queue":
+                request = urllib2.Request('https://localhost:8080/stats/Queues/Global/Queued?samples=1&increment=86400')
+                base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+                request.add_header("Authorization", "Basic %s" % base64string)
+                response = urllib2.urlopen(request)
+                getdata = simplejson.load(response)
+                valore=0
+                valore = valore + getdata[u'data'][u'Queues'][u'Global'][u'Queued'][u'values'][0]
+                print (MODE + " " + str(valore))
+
+        if MODE == "Delivery":
+                request = urllib2.Request('https://localhost:8080/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400')
+                base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+                request.add_header("Authorization", "Basic %s" % base64string)
+                response = urllib2.urlopen(request)
+                getdata = simplejson.load(response)
+                valore=0
+                valore = valore + getdata[u'data'][u'Messages'][u'Email'][u'MsgSentRecipients'][u'values'][0]
+                print (MODE + " " + str(valore))
+        if MODE == "Concurrency":
+                getdata = os.popen("netstat -natup|grep -v '0.0.0.0'|awk '{print $4}'|awk -F ':' '{print $2}'|grep -w 25|wc -l")
+                valore=getdata.read().strip()
+                print (MODE + " " + str(valore))
