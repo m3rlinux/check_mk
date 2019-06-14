@@ -10,7 +10,8 @@ On Client:
         chmod 700 /usr/lib/check_mk_agent/plugins/cloudmark
 
 On Monitoring Server:
- If using OMD: 
+ If using OMD:
+ 
         cp checks/cloudmark ~/local/share/check_mk/checks/
         cp checkman/cloudmark ~/local/share/check_mk/checkman/
         cp wato/plugins/cloudmark.py ~/local/share/check_mk/web/plugins/wato/
