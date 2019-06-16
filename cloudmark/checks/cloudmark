@@ -46,8 +46,7 @@ except IOError:
     print "\tExample (single row): username:password\n"
     sys.exit(1)
 
-userPasswd = tuple(credentials.strip('\n').split(":"))
-base64string = base64.standard_b64encode("%s" % userPasswd)
+base64string = base64.standard_b64encode(credentials.strip('\n'))
 
 print "<<<cloudmark>>>"
 modes = ["Queue", "Delivery", "Concurrency"]
