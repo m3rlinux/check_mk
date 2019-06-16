@@ -47,7 +47,7 @@ except IOError:
     sys.exit(1)
 
 userPasswd = tuple(credentials.strip('\n').split(":"))
-base64string = base64.standard_b64encode("%s:%s" % userPasswd)
+base64string = base64.standard_b64encode("%s" % userPasswd)
 
 print "<<<cloudmark>>>"
 modes = ["Queue", "Delivery", "Concurrency"]
