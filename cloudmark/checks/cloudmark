@@ -16,62 +16,55 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# check_mk --debug -nv --checks=cloudmark some.host-cloudmark.dom
-
-# example output
+#
+# Example Agent Output:
 # <<<cloudmark>>>
-# Queue 72
-# Delivery 8830
-# Concurrency 5573
+# Queue 82
+# Delivery 13056
+# Concurrency 2680
+#
+# Put your username and password into cloudmark.cfg in MK_CONFDIR
+# format: username:password
 
-# Threshold
-factory_settings["cloudmark_default_levels"] = {
-    "Queue"         : (5000, 10000),
-    "Delivery"      : (5000, 30000),
-    "Concurrency"   : (8000, 10000),
-}
+import os
+import json
+import urllib2
+import base64
+import sys
 
+MK_CONFDIR = os.getenv("MK_CONFDIR") or "/etc/check_mk"
+config_file = 'cloudmark.cfg'
+queue_url = 'https://localhost:8080/stats/Queues/Global/Queued?samples=1&increment=86400'
+delivery_url = 'https://localhost:8080/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400'
 
-def inventory_cloudmark(info):
-    for line in info:
-        key = line[0]
-        if key == "Queue":
-            yield key, {}
-        elif key == "Delivery":
-            yield key, {}
-        elif key == "Concurrency":
-            yield key, {}
+try:
+    f = open(os.path.join(MK_CONFDIR, config_file), 'r')
+    credentials = f.read()
+    f.close()
+except IOError:
+    print "\nUnable to find configuration file, please create %s in %s\n" % (config_file, MK_CONFDIR)
+    print "\tExample (single row): username:password\n"
+    sys.exit(1)
 
+userPasswd = tuple(credentials.strip('\n').split(":"))
+base64string = base64.standard_b64encode("%s:%s" % userPasswd)
 
-def check_cloudmark(item, params, info):
-    for line in info:
-        key = line[0]
-        warn, crit = (0, 0)
-        if key == item:
-            if item == 'Queue':
-                warn = params['Queue'][0]
-                crit = params['Queue'][1]
-            elif item == 'Delivery':
-                warn = params['Delivery'][0]
-                crit = params['Delivery'][1]
-            elif item == 'Concurrency':
-                warn = params['Concurrency'][0]
-                crit = params['Concurrency'][1]
-            val = int(line[1])
-            perfdata = [(item, val, warn, crit)]
-            if val > crit:
-                return 2, "Mail %s is %d" % (item, val), perfdata
-            elif val > warn:
-                return 1, "Mail %s is %d" % (item, val), perfdata
-            else:
-                return 0, "Mail %s is %d" % (item, val), perfdata
-
-
-check_info["cloudmark"] = {
-    'check_function':            check_cloudmark,
-    'inventory_function':        inventory_cloudmark,
-    "default_levels_variable" : "cloudmark_default_levels",
-    'service_description':       'Cloudmark %s',
-    'has_perfdata':              True,
-    'group': "cloudmark",
-}
+print "<<<cloudmark>>>"
+modes = ["Queue", "Delivery", "Concurrency"]
+for mode in modes:
+    if mode == "Queue":
+        request = urllib2.Request(queue_url)
+        request.add_header("Authorization", "Basic %s" % base64string)
+        response = urllib2.urlopen(request)
+        data = json.load(response)
+        value = data['data']['Queues']['Global']['Queued']['values'][0]
+    elif mode == "Delivery":
+        request = urllib2.Request(delivery_url)
+        request.add_header("Authorization", "Basic %s" % base64string)
+        response = urllib2.urlopen(request)
+        data = json.load(response)
+        value = data['data']['Messages']['Email']['MsgSentRecipients']['values'][0]
+    elif mode == "Concurrency":
+        data = os.popen("netstat -antp | grep ':25' | grep -v LISTEN | wc -l")
+        value = data.read()
+    print "%s %s" % (mode, value)
