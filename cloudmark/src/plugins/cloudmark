@@ -22,37 +22,49 @@
 # Queue 82
 # Delivery 13056
 # Concurrency 2680
+#
+# Put your username and password into cloudmark.cfg in MK_CONFDIR
+# format: username:password
 
+import os
+import json
 import urllib2
 import base64
-import json as simplejson
-username = ""
-password = ""
+import sys
 
+MK_CONFDIR = os.getenv("MK_CONFDIR") or "/etc/check_mk"
+config_file = 'cloudmark.cfg'
+queue_url = 'https://localhost:8080/stats/Queues/Global/Queued?samples=1&increment=86400'
+delivery_url = 'https://localhost:8080/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400'
 
-print('<<<cloudmark>>>')
+try:
+    f = open(os.path.join(MK_CONFDIR, config_file), 'r')
+    credentials = f.read()
+    f.close()
+except IOError:
+    print "\nUnable to find configuration file, please create %s in %s\n" % (config_file, MK_CONFDIR)
+    print "\tExample (single row): username:password\n"
+    sys.exit(1)
+
+base64string = base64.standard_b64encode(credentials.strip('\n'))
+
+print "<<<cloudmark>>>"
 modes = ["Queue", "Delivery", "Concurrency"]
-for MODE in modes:
-        if MODE == "Queue":
-                request = urllib2.Request('https://localhost:8080/stats/Queues/Global/Queued?samples=1&increment=86400')
-                base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-                request.add_header("Authorization", "Basic %s" % base64string)
-                response = urllib2.urlopen(request)
-                getdata = simplejson.load(response)
-                valore=0
-                valore = valore + getdata[u'data'][u'Queues'][u'Global'][u'Queued'][u'values'][0]
-                print (MODE + " " + str(valore))
-
-        if MODE == "Delivery":
-                request = urllib2.Request('https://localhost:8080/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400')
-                base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-                request.add_header("Authorization", "Basic %s" % base64string)
-                response = urllib2.urlopen(request)
-                getdata = simplejson.load(response)
-                valore=0
-                valore = valore + getdata[u'data'][u'Messages'][u'Email'][u'MsgSentRecipients'][u'values'][0]
-                print (MODE + " " + str(valore))
-        if MODE == "Concurrency":
-                getdata = os.popen("netstat -natup|grep -v '0.0.0.0'|awk '{print $4}'|awk -F ':' '{print $2}'|grep -w 25|wc -l")
-                valore=getdata.read().strip()
-                print (MODE + " " + str(valore))
+for mode in modes:
+    if mode == "Queue":
+        request = urllib2.Request(queue_url)
+        request.add_header("Authorization", "Basic %s" % base64string)
+        response = urllib2.urlopen(request)
+        data = json.load(response)
+        value = data['data']['Queues']['Global']['Queued']['values'][0]
+    elif mode == "Delivery":
+        request = urllib2.Request(delivery_url)
+        request.add_header("Authorization", "Basic %s" % base64string)
+        response = urllib2.urlopen(request)
+        data = json.load(response)
+        value = data['data']['Messages']['Email']['MsgSentRecipients']['values'][0]
+    elif mode == "Concurrency":
+        data = os.popen("netstat -antp | grep ':25' | grep -v LISTEN | wc -l")
+        value = data.read()
+    print "%s %s" % (mode, value)
+	
