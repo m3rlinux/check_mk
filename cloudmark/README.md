@@ -17,11 +17,8 @@ These instructions will get you the cloudmark plugin correctly installed on your
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
+#### On Host to be monitored
+- [x] python2.7
 
 ### Installing package
 
