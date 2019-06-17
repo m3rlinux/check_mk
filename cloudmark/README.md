@@ -34,7 +34,7 @@ Give examples
 #### Example
 ```
 # su - mysite
-~ wget http://github.com/m3rlinux/check_mk/cloudmark/cloudmark-v1.0.mpk
+~ wget https://github.com/m3rlinux/check_mk/raw/master/cloudmark/cloudmark-1.0.mkp
 ~ cmk -P install cloudmark-v1.0.mpk
 ```
 
@@ -49,7 +49,7 @@ Give examples
 #### Exampe
 
 ```
-# wget http://github.com/m3rlinux/check_mk/cloudmark/cloudmark/plugins/cloudmark
+# wget https://raw.githubusercontent.com/m3rlinux/check_mk/master/cloudmark/src/plugins/cloudmark
 # mv cloudmark /usr/lib/check_mk_agent/plugins/
 # chmod +x /usr/lib/check_mk_agent/plugins/cloudmark
 ```
