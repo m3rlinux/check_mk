@@ -57,4 +57,4 @@ Give examples
 ## License
 
 This project is licensed under the GPLv3 License. [See more details in license file](../LICENSE)
-
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
