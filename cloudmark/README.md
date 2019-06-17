@@ -43,7 +43,7 @@ These instructions will get you the cloudmark plugin correctly installed on your
 1. move the plugin into "plugins" folder of your agent;
 1. add execution permission to the file.
 
-#### Exampe
+#### Example
 
 ```
 # wget https://raw.githubusercontent.com/m3rlinux/check_mk/master/cloudmark/src/plugins/cloudmark
