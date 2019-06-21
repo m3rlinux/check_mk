@@ -42,6 +42,7 @@ These instructions will get you the cloudmark plugin correctly installed on your
 1. download the plugin; `wget|curl`
 1. move the plugin into "plugins" folder of your agent;
 1. add execution permission to the file.
+1. create cloudmark.cfg under /etc/check_mk
 
 #### Example
 
@@ -49,6 +50,7 @@ These instructions will get you the cloudmark plugin correctly installed on your
 # wget https://raw.githubusercontent.com/m3rlinux/check_mk/master/cloudmark/src/plugins/cloudmark
 # mv cloudmark /usr/lib/check_mk_agent/plugins/
 # chmod +x /usr/lib/check_mk_agent/plugins/cloudmark
+echo "username:password" > /etc/check_mk/cloudmark.cfg
 ```
 
 ## License
