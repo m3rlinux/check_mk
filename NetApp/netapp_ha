@@ -1,0 +1,82 @@
+# !/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+# +------------------------------------------------------------------+
+# | Copyright m3rlinux 2019                    m3rlinux.it@gmail.com |
+# +------------------------------------------------------------------+
+#
+# This file extend check snmp for Check_MK
+#
+# check_mk is free software;  you can redistribute it and/or modify it
+# under the  terms of the  GNU General Public License  as published by
+# the Free Software Foundation in version 2.  check_mk is  distributed
+# in the hope that it will be useful, but WITHOUT ANY WARRANTY;  with-
+# out even the implied warranty of  MERCHANTABILITY  or  FITNESS FOR A
+# PARTICULAR PURPOSE. See the  GNU General Public License for more de-
+# tails. You should have  received  a copy of the  GNU  General Public
+# License along with GNU Make; see the file  COPYING.  If  not,  write
+# to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
+# Boston, MA 02110-1301 USA.
+
+# Author: Davide Gibilisco <m3rlinux.it@gmail.com>
+# NetApp Cluster: Check HA Status
+
+# Items example:
+# [[u'storageM20', u'4', u'17', u'3', u'storageM22', u'4']]
+
+# haState: INTEGER {dead(1), canTakeover(2), cannotTakeover(3), takeover(4), partialGiveback(5)}
+
+
+def inventory_cs_netapp_node(info):
+    return [("Status", None)]
+
+
+def check_cs_netapp_node(item, _no_params, info):
+    map_hastates = {"1": (2, "is Dead"),
+                    "2": (0, "can Takeover"),
+                    "3": (1, "cannot Takover"),
+                    "4": (1, "is in Takeover"),
+                    "5": (1, "is in Partial Giveback")
+                    }
+    map_pstates = {"1": (1, "is maybe Down"),
+                   "2": (0, "is Ok"),
+                   "3": (2, "is Dead")
+                   }
+    map_icstates = {"1": (1, "is not present"),
+                    "2": (1, "is Down"),
+                    "3": (1, "is in Partial Failure"),
+                    "4": (0, "is Up")
+                    }
+    nname, hastate, notTakover, pstate, pname, icstate = [i for i in info[0]]
+    nagios_hastate, nagios_hastate_readable = map_hastates[hastate]
+    nagios_pstate, nagios_pstate_readable = map_pstates[pstate]
+    nagios_icstate, nagios_icstate_readable = map_icstates[icstate]
+    if nagios_hastate == 0 and nagios_pstate == 0 and nagios_icstate == 0:
+        return 0, "HA Status is OK - Node %s: %s; Partner %s: %s; HA Interconnect %s" % (nname, nagios_hastate_readable, pname,
+                                                                                         nagios_pstate_readable, nagios_icstate_readable)
+    elif nagios_hastate == 1:
+        return 1, "HA Status is WARNING - Node %s: %s; Partner %s: %s; HA Interconnect %s" % (nname, nagios_hastate_readable, pname,
+                                                                                              nagios_pstate_readable, nagios_icstate_readable)
+    elif nagios_hastate == 2:
+        if nagios_pstate == 0:
+            return 1, "HA Status is WARNING - Node %s: %s; Partner %s: %s; HA Interconnect %s" % (nname, nagios_hastate_readable, pname,
+                                                                                                  nagios_pstate_readable, nagios_icstate_readable)
+        else:
+            return 2, "HA Status is CRITICAL - Node %s: %s; Partner %s: %s; HA Interconnect %s" % (nname, nagios_hastate_readable, pname,
+                                                                                                   nagios_pstate_readable, nagios_icstate_readable)
+
+
+check_info["cs_netapp_node"] = {
+    'check_function': check_cs_netapp_node,
+    'inventory_function': inventory_cs_netapp_node,
+    'service_description': 'HA %s',
+    'snmp_info': ('.1.3.6.1.4.1.789.1.21.2.1', ['1',  # haNodeName
+                                                '4',  # haState
+                                                '5',  # haCannotTakeoverCause
+                                                '6',  # haPartnerStatus
+                                                '8',  # haPartnerName
+                                                '10',  # haInterconnectStatus
+                                                ]),
+    'snmp_scan_function': \
+        lambda oid: oid(".1.3.6.1.2.1.1.2.0").startswith(".1.3.6.1.4.1.789.") and \
+                    oid(".1.3.6.1.4.1.789.1.21.2.1.1.*") is not None,
+}
