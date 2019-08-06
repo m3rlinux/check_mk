@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 
-# Check_MK Cloudmark Info Plugin
+# Cloudmark Plugin
 #
 # Copyright 2019, Davide Gibilisco <m3rlinux.it@gmail.com>
 #
@@ -25,17 +25,27 @@
 #
 # Put your username and password into cloudmark.cfg in MK_CONFDIR
 # format: username:password
+#
+# WARNING!!! For Cloudmark 4 the value of check Delivery is dalayed by 5 minutes,
+# because it's hard to fetch the real time value
 
 import os
-import json
 import urllib2
 import base64
 import sys
+from datetime import datetime, timedelta
+import re
+try:
+    import simplejson as json
+except ImportError:
+    try:
+        import json
+    except ImportError:
+        print "You need to install python simplejson or json module"
+        sys.exit(1)
 
 MK_CONFDIR = os.getenv("MK_CONFDIR") or "/etc/check_mk"
 config_file = 'cloudmark.cfg'
-queue_url = 'https://localhost:8080/stats/Queues/Global/Queued?samples=1&increment=86400'
-delivery_url = 'https://localhost:8080/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400'
 
 try:
     f = open(os.path.join(MK_CONFDIR, config_file), 'r')
@@ -46,25 +56,57 @@ except IOError:
     print "\tExample (single row): username:password\n"
     sys.exit(1)
 
-base64string = base64.standard_b64encode(credentials.strip('\n'))
+cm4 = 0  # Default check Cloudmark 5
+r = os.popen('ps -ef | grep /usr/bin/bizimp | grep -v grep').read()
+if '/usr/bin/bizimp' in r:
+    cm4 = 1
+
+time5ago = datetime.now() - timedelta(minutes=5)
+
+if cm4:
+    user = credentials.split(":")[0]
+    password = credentials.split(":")[1].rstrip()  # rstrip() remove spaces or newlines
+else:
+    base64string = base64.standard_b64encode(credentials.rstrip())
+    queue_url = 'https://localhost:4443/stats/Queues/Global/Queued?samples=1&increment=86400'
+
+delivery_url = 'https://localhost:4443/stats/Messages/Email/MsgSentRecipients/?samples=1&increment=86400'
 
 print "<<<cloudmark>>>"
 modes = ["Queue", "Delivery", "Concurrency"]
 for mode in modes:
     if mode == "Queue":
-        request = urllib2.Request(queue_url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        data = json.load(response)
-        value = data['data']['Queues']['Global']['Queued']['values'][0]
+        if cm4:
+            value = 0
+            stats_url = "http://127.0.0.1:8082/stats?suser=%s&spass=%s" % (user, password)
+            m = re.compile(r'/Message/Queues/Wait')
+            request = urllib2.urlopen(stats_url)
+            value = value + int(filter(m.match, request)[0].split(";")[2].rstrip())
+        else:
+            request = urllib2.Request(queue_url)
+            request.add_header("Authorization", "Basic %s" % base64string)
+            response = urllib2.urlopen(request)
+            data = json.load(response)
+            value = data['data']['Queues']['Global']['Queued']['values'][0]
     elif mode == "Delivery":
-        request = urllib2.Request(delivery_url)
-        request.add_header("Authorization", "Basic %s" % base64string)
-        response = urllib2.urlopen(request)
-        data = json.load(response)
-        value = data['data']['Messages']['Email']['MsgSentRecipients']['values'][0]
+        # Computes the mean delivery per minute of five minute ago respect the current time
+        if cm4:
+            stats_url = "http://127.0.0.1:8082/stats?suser=%s&spass=%s&date=%s&view=5min" % (user, password, time5ago.strftime("%Y%m%d%H%M"))
+            m = re.compile(r'/Message/Queues/Done/delivery;COUNTER')
+            request = urllib2.urlopen(stats_url)
+            value = int(filter(m.match, request)[0].split(";")[2].rstrip()) / 5
+        else:
+            request = urllib2.Request(delivery_url)
+            request.add_header("Authorization", "Basic %s" % base64string)
+            response = urllib2.urlopen(request)
+            data = json.load(response)
+            value = data['data']['Messages']['Email']['MsgSentRecipients']['values'][0]
     elif mode == "Concurrency":
-        data = os.popen("netstat -antp | grep ':25' | grep -v LISTEN | wc -l")
-        value = data.read()
+        if cm4:
+            count = os.popen("netstat -natup|grep -v '0.0.0.0'|awk '{print $4}'|awk -F ':' '{print $2}'|grep -w 25|wc -l")
+            value = count.read().strip()
+        else:
+            data = os.popen("netstat -antp | grep ':25' | grep -v LISTEN | wc -l")
+            value = data.read()
     print "%s %s" % (mode, value)
-	
+
