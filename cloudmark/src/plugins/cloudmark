@@ -81,7 +81,8 @@ for mode in modes:
             stats_url = "http://127.0.0.1:8082/stats?suser=%s&spass=%s" % (user, password)
             m = re.compile(r'/Message/Queues/Wait')
             request = urllib2.urlopen(stats_url)
-            value = value + int(filter(m.match, request)[0].split(";")[2].rstrip())
+            for i in filter(m.match, request):
+                value = value + int(i.split(";")[2].rstrip())
         else:
             request = urllib2.Request(queue_url)
             request.add_header("Authorization", "Basic %s" % base64string)
