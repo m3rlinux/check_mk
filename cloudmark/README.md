@@ -24,7 +24,7 @@ These instructions will get you the cloudmark plugin correctly installed on your
 
 1. Connect via SSH on your monitoring server;
 1. change user to your site;
-1. Download the cloudmark-v1.0.mkp; `wget|curl`
+1. Download the cloudmark-v1.1.mkp; `wget|curl`
 1. use cmk to install de package.
 
 
