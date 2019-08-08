@@ -31,7 +31,7 @@ These instructions will get you the cloudmark plugin correctly installed on your
 #### Example
 ```
 # su - mysite
-~ wget https://github.com/m3rlinux/check_mk/raw/master/cloudmark/cloudmark-1.0.mkp
+~ wget https://github.com/m3rlinux/check_mk/raw/master/cloudmark/cloudmark-1.1.mkp
 ~ cmk -P install cloudmark-v1.0.mpk
 ```
 
