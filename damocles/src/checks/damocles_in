@@ -21,26 +21,32 @@
 # Damocles
 # '.1.3.6.1.4.1.21796.3.4.1.1.3' => Check Name
 # '.1.3.6.1.4.1.21796.3.4.1.1.2' => Check Value
+# '.1.3.6.1.4.1.21796.3.4.1.1.4' => Alarm ON/OFF
+# '.1.3.6.1.4.1.21796.3.4.1.1.6' => Pulse Counter
 
-def inventory_damocles(info):
+def inventory_damocles_in(info):
     for line in info:
-        yield line[0], None
+        alarm = int(line[2])
+        if alarm != 0:
+            yield line[0], None
 
 
-def check_damocles(item, _no_params, info):
-    for check, state in info:
+def check_damocles_in(item, _no_params, info):
+    for check, state, enable, pulseCount in info:
         if check == item:
+            perfdata = [("pulseCount", pulseCount, None, None, None)]
             if state == "0":
-                return 0, "OK"
+                return 0, "OK", perfdata
             else:
-                return 2, "CRIT"
+                return 2, "CRIT", perfdata
 
 
-check_info["damocles"] = {
-    'check_function': check_damocles,
-    'inventory_function': inventory_damocles,
+check_info["damocles_in"] = {
+    'check_function': check_damocles_in,
+    'inventory_function': inventory_damocles_in,
     'service_description': '',
-    'snmp_info': ('.1.3.6.1.4.1.21796.3.4.1.1', ['3', '2']),
+    'has_perfdata': True,
+    'snmp_info': ('.1.3.6.1.4.1.21796.3.4.1.1', ['3', '2', '4', '6']),
     'snmp_scan_function': \
         lambda oid: oid(".1.3.6.1.2.1.1.2.0").startswith(".1.3.6.1.4.1.21796.") or \
                     oid(".1.3.6.1.4.1.1.2.0") == "damocles",
