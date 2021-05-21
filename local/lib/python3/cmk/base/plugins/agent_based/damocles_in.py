@@ -52,7 +52,7 @@ def check_damocles_in(item, section):
 
 
 register.snmp_section(
-    name = "damocles_in",
+    name = "damocles_in.py",
     detect = startswith(".1.3.6.1.2.1.1.1.0", "Damocles"),
     parse_function=parse_damocles_in,
     fetch = SNMPTree(
@@ -68,7 +68,7 @@ register.snmp_section(
 )
 
 register.check_plugin(
-    name="damocles_in",
+    name="damocles_in.py",
     service_name="%s",
     discovery_function=discover_damocles_in,
     check_function=check_damocles_in,

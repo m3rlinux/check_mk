@@ -41,7 +41,7 @@ def check_damocles_in(item, _no_params, info):
                 return 2, "CRIT", perfdata
 
 
-check_info["damocles_in"] = {
+check_info["damocles_in.py"] = {
     'check_function': check_damocles_in,
     'inventory_function': inventory_damocles_in,
     'service_description': '',
