@@ -26,6 +26,7 @@
 
 from .agent_based_api.v1 import *
 
+
 def parse_damocles_in(string_table):
     section = []
     for line in string_table:
@@ -52,17 +53,17 @@ def check_damocles_in(item, section):
 
 
 register.snmp_section(
-    name = "damocles_in.py",
-    detect = startswith(".1.3.6.1.2.1.1.1.0", "Damocles"),
+    name="damocles_in.py",
+    detect=startswith(".1.3.6.1.2.1.1.1.0", "Damocles"),
     parse_function=parse_damocles_in,
-    fetch = SNMPTree(
-        base = '.1.3.6.1.4.1.21796.3.4.1.1',
-        oids = [
+    fetch=SNMPTree(
+        base='.1.3.6.1.4.1.21796.3.4.1.1',
+        oids=[
             OIDEnd(),
-            '3', # Sensor Name
-            '2', # Sensor Value
-            '4', # Sensor alarm State (ON/OFF)
-            '6', # Sensor Pulse Counter
+            '3',  # Sensor Name
+            '2',  # Sensor Value
+            '4',  # Sensor alarm State (ON/OFF)
+            '6',  # Sensor Pulse Counter
         ],
     ),
 )
