@@ -31,7 +31,7 @@ These instructions will get you the qmail plugin correctly installed on your Che
 #### Example
 ```
 # su - mysite
-~ wget https://github.com/m3rlinux/check_mk/raw/master/check_mk/plugins/qmail/qmail-1.0.mkp
+~ wget https://github.com/m3rlinux/check_mk/raw/1.6/plugins/qmail/qmail-1.0.mkp
 ~ cmk -P install qmail-1.0.mpk
 ```
 
@@ -46,7 +46,7 @@ These instructions will get you the qmail plugin correctly installed on your Che
 #### Example
 
 ```
-# wget https://github.com/m3rlinux/check_mk/raw/master/check_mk/plugins/qmail/plugins/mk_qmail
+# wget https://github.com/m3rlinux/check_mk/raw/1.6/plugins/qmail/agent/mk_qmail
 # mv mk_qmail /usr/lib/check_mk_agent/plugins/
 # chmod +x /usr/lib/check_mk_agent/plugins/cloudmark
 ```
