@@ -71,7 +71,7 @@ rulespec_registry.register(
     CheckParameterRulespecWithoutItem(
         check_group_name="qmail_concurrency_length",
         group=RulespecGroupCheckParametersApplications,
-        is_deprecated=True,
+        is_deprecated=False,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_mailconcurrency_length,
         title=lambda: _("Number of concurrency in local/remote qmail"),

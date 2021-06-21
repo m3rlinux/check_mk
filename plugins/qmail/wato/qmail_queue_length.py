@@ -71,7 +71,7 @@ rulespec_registry.register(
     CheckParameterRulespecWithoutItem(
         check_group_name="qmail_queue_length",
         group=RulespecGroupCheckParametersApplications,
-        is_deprecated=True,
+        is_deprecated=False,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_mailqueue_length,
         title=lambda: _("Number of mails in local/remote qmail queues"),
