@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# Check_MK Qmail Concurrency Plugin
+#
+# Copyright 2021, Davide Gibilisco <m3rlinux.it@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# cmk --debug -nv --checks=qmail_concurrency some.host-qmail.dom
+
+# Example Agent Output:
+# <<<qmail_queue:sep(58)>>>
+# local:0
+# remote:0
+# <<<qmail_concurrency:sep(58)>>>
+# local:0
+# remote:0
+
+factory_settings['qmail_concurrency_default_levels'] = {
+    "local": (1000, 2000),
+    "remote": (8000, 10000),
+}
+
+
+def inventory_qmail_concurrency(info):
+    for line in info:
+        yield line[0], {}
+
+
+def check_qmail_concurrency(item, params, info):
+    if not isinstance(params, dict):
+        params = {
+            "local": params,
+        }
+    for line in info:
+        if item == line[0]:
+            state = 0
+            message = ''
+            perf = ''
+            label = ''
+            queue, val = line
+            queue_length = int(val)
+            if queue == "local":
+                warn, crit = params[queue]
+                if queue_length >= crit:
+                    state = 2
+                elif queue_length >= warn:
+                    state = 1
+
+                if state:
+                    label = "(Levels at %d/%d)" % (warn, crit)
+
+                perf = [('lconcur', queue_length, warn, crit)]
+                message = "Local concurrency is %d %s" % (queue_length, label)
+                yield state, message, perf
+            else:
+                warn, crit = params[queue]
+                if queue_length >= crit:
+                    state = 2
+                elif queue_length >= warn:
+                    state = 1
+
+                if state:
+                    label = "(Levels at %d/%d)" % (warn, crit)
+
+                perf = [('rconcur', queue_length, warn, crit)]
+                message = "Remote concurrency is %d %s" % (queue_length, label)
+                yield state, message, perf
+
+
+check_info['qmail_concurrency'] = {
+    "inventory_function": inventory_qmail_concurrency,
+    "check_function": check_qmail_concurrency,
+    "service_description": "Qmail Concurrency %s",
+    "has_perfdata": True,
+    "default_levels_variable": "qmail_concurrency_default_levels",
+    "group": "qmail_concurrency_length",
+}

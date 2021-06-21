@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Qmail Plugin
+#
+# Copyright 2019, Davide Gibilisco <m3rlinux.it@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Example Agent Output:
+# <<<qmail_queue:sep(58)>>>
+# local:0
+# remote:0
+# <<<qmail_concurrency:sep(58)>>>
+# local:0
+# remote:0
+
+echo '<<<qmail_queue:sep(58)>>>'
+echo -n "local:"
+/var/qmail/bin/qr | grep local | grep -v done | wc -l
+echo -n "remote:"
+/var/qmail/bin/qr | grep remote | grep -v done | wc -l
+
+echo '<<<qmail_concurrency:sep(58)>>>'
+count=0
+for i in $(/usr/local/bin/qmailmrtg7 c /var/log/qmail); do
+  if [ -z $i ]; then
+    break
+  else
+    let "++count"
+    if [ $count -eq 1 ]; then
+      echo "local:$i"
+    elif [ $count -eq 2 ]; then
+       echo "remote:$i"
+    fi
+  fi
+done
