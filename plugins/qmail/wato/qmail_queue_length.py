@@ -74,5 +74,5 @@ rulespec_registry.register(
         is_deprecated=True,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_mailqueue_length,
-        title=lambda: _("Number of mails in local/remote mail queues"),
+        title=lambda: _("Number of mails in local/remote qmail queues"),
     ))
