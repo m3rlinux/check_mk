@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# Check_MK Qmail Queue Plugin
+#
+# Copyright 2021, Davide Gibilisco <m3rlinux.it@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# cmk --debug -nv --checks=qmail_queue some.host-qmail.dom
+
+# Example Agent Output:
+# <<<qmail_queue:sep(58)>>>
+# <<<qmail:sep(124)>>>
+# queue|local|0
+# queue|remote|0
+# concurrency|local|0
+# concurrency|remote|0
+
+def inventory_qmail_queue(info):
+    for line in info:
+        yield line[0], {}
+
+
+def check_qmail(item, params, info):
+    for line in info:
+        if item == line[0]:
+            state = 0
+            message = ''
+            perf = ''
+            label = ''
+            qtype, queue, val = line
+            queue_length = int(val)
+            warn, crit = params[queue]
+            if queue_length >= crit:
+                state = 2
+            elif queue_length >= warn:
+                state = 1
+
+            if state:
+                label = "(Levels at %d/%d)" % (warn, crit)
+
+            perf = [(qtype + queue.capitalize(), queue_length, warn, crit)]
+            message = "%s %s is %d %s" % (queue, qtype, queue_length, label)
+            yield state, message, perf
+
+
+check_info['qmail'] = {
+    "inventory_function": inventory_qmail,
+    "check_function": check_qmail,
+    "service_description": "Qmail %s L/R",
+    "has_perfdata": True,
+    "group": "qmail",
+}
+
