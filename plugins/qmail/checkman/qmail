@@ -15,6 +15,7 @@ description:
 
  Default warn or critical values are set and graphs will be created.
 item:
- To Do
+ Concurrency
+ Queue
 inventory:
  Automatic inventory is supported.

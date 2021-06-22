@@ -26,7 +26,7 @@
 # concurrency|local|0
 # concurrency|remote|0
 
-def inventory_qmail_queue(info):
+def inventory_qmail(info):
     for line in info:
         yield line[0], {}
 
@@ -38,13 +38,16 @@ def check_qmail(item, params, info):
             message = ''
             perf = ''
             label = ''
+            warn, crit = 0, 0
             qtype, queue, val = line
             queue_length = int(val)
-            warn, crit = params[queue]
-            if queue_length >= crit:
-                state = 2
-            elif queue_length >= warn:
-                state = 1
+            if params:
+                warn, crit = params[queue]
+
+                if queue_length >= crit:
+                    state = 2
+                elif queue_length >= warn:
+                    state = 1
 
             if state:
                 label = "(Levels at %d/%d)" % (warn, crit)
@@ -61,4 +64,3 @@ check_info['qmail'] = {
     "has_perfdata": True,
     "group": "qmail",
 }
-

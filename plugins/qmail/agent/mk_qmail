@@ -18,19 +18,18 @@
 #
 # Example Agent Output:
 # <<<qmail_queue:sep(58)>>>
-# local:0
-# remote:0
-# <<<qmail_concurrency:sep(58)>>>
-# local:0
-# remote:0
+# <<<qmail:sep(124)>>>
+# queue|local|0
+# queue|remote|0
+# concurrency|local|0
+# concurrency|remote|0
 
-echo '<<<qmail_queue:sep(58)>>>'
-echo -n "local:"
+echo '<<<qmail:sep(124)>>>'
+echo -n "queue|local|"
 /var/qmail/bin/qr | grep local | grep -v done | wc -l
-echo -n "remote:"
+echo -n "queue|remote|"
 /var/qmail/bin/qr | grep remote | grep -v done | wc -l
 
-echo '<<<qmail_concurrency:sep(58)>>>'
 count=0
 for i in $(/usr/local/bin/qmailmrtg7 c /var/log/qmail); do
   if [ -z $i ]; then
@@ -38,9 +37,9 @@ for i in $(/usr/local/bin/qmailmrtg7 c /var/log/qmail); do
   else
     let "++count"
     if [ $count -eq 1 ]; then
-      echo "local:$i"
+      echo "concurrency|local|$i"
     elif [ $count -eq 2 ]; then
-       echo "remote:$i"
+       echo "concurrency|remote|$i"
     fi
   fi
 done
