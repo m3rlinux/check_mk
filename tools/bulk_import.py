@@ -7,7 +7,7 @@ import sys
 usage = """Run this script inside a OMD site
     Usage: ./wato_import.py csvfile.csv
     CSV Example:
-        wato_foldername;hostname;host_alias;ipaddress;tag1;tag2;tag3;tag4"""
+        wato_foldername;hostname;host_alias;ipaddress;tag1 tag2 tag3 tag4"""
 
 try:
     path = os.environ.pop('OMD_ROOT')
@@ -15,7 +15,6 @@ try:
     pathlocal = os.path.expanduser(pathlocal)
     csv_file = open(sys.argv[1], 'r')
 except:
-    print pathlocal
     print(usage)
     sys.exit()
 
@@ -53,7 +52,6 @@ for tag_group in wato_tags['tag_groups']:
 
 for folder in folders:
     all_hosts = ""
-    DG_host_attr = {}
     ips = ""
     servers = {}
     folder_tags = {}
@@ -97,7 +95,7 @@ for folder in folders:
     folder_tags = {folder: {}}
     for k, v in duptag.items():
         for k2, v2 in v.items():
-            if v2 > 1:
+            if v2 > 1 and v2 == len(servers):
                 folder_tags[folder].update({k: k2})
 
     for k, v in servers.items():
@@ -119,7 +117,16 @@ for folder in folders:
     hosts_mk_file.write(')\n\n')
     hosts_mk_file.close()
 
+    subfolders = folder.lower().split("/")
+    while len(subfolders) > 1:
+        subfolder = "/".join(subfolders)
+        if not os.path.exists(pathlocal + "/" + subfolder + '/.wato'):
+            wato_file = open(pathlocal + "/" + subfolder + '/.wato', 'w')
+            wato_file.write("{'title': '%s'}\n" % subfolder.upper().split("/")[-1])
+            wato_file.close()
+        subfolders.pop()[-1]
+
     wato_file = open(pathlocal + "/" + folder + '/.wato', 'w')
     wato_file.write("{'attributes': %s, 'num_hosts': %d, 'title': '%s'}\n" %
-                    (folder_tags[folder], len(folders[folder]), folder.split("/")[-1].upper()))
+                    (folder_tags[folder], len(folders[folder]), folder.upper().split("/")[-1]))
     wato_file.close()
