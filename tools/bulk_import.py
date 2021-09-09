@@ -26,10 +26,10 @@ for line in csv_file:
     if len(line.split(';')) != 5:
         print(usage)
         sys.exit()
-    target_folder, name, alias, ipaddress, tags = line.split(';')
+    target_folder, name, alias, ipaddress, tags = line.lower().split(';')
     if target_folder:
         try:
-            os.makedirs(pathlocal + "/" + target_folder.lower())
+            os.makedirs(pathlocal + "/" + target_folder)
         except os.error:
             pass
         folders.setdefault(target_folder, [])
@@ -117,7 +117,7 @@ for folder in folders:
     hosts_mk_file.write(')\n\n')
     hosts_mk_file.close()
 
-    subfolders = folder.lower().split("/")
+    subfolders = folder.split("/")
     while len(subfolders) > 1:
         subfolder = "/".join(subfolders)
         if not os.path.exists(pathlocal + "/" + subfolder + '/.wato'):
